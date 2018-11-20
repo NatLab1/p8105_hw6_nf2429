@@ -7,5 +7,24 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(purrr)
+```
+
+```{r}
+murder_data = read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
+
+murder_data = murder_data %>%
+  unite("city_state", c("city", "state"), sep = ",", remove = TRUE)
+
+murder_data = murder_data %>%
+  mutate(solved_case = ifelse(disposition == c("Closed by arrest"), 1, 0)) %>%
+  mutate(victim_race = ifelse(victim_race != "White", "Non-White", "White")) %>%
+  mutate(victim_race = forcats::fct_relevel(victim_race, "White", "Non-White")) %>%
+  mutate(victim_age = as.numeric(victim_age)) 
+
+
+
 ```
 
