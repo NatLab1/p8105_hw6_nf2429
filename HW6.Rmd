@@ -12,6 +12,9 @@ library(tidyverse)
 library(purrr)
 ```
 
+#Problem 1  
+
+##Data import and cleaning
 ```{r}
 murder_data = read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
 
@@ -25,9 +28,19 @@ murder_data = murder_data %>%
   mutate(victim_age = as.numeric(victim_age)) 
 
 murder_data = murder_data %>%
-  filter(!(city_state %in% c("Dallas,TX,", "Phoenix,AZ", "Kansas City,MO", "Tulsa,AL")))
-
-
-
+  filter(!(city_state %in% c("Dallas,TX,", "Phoenix,AZ", "Kansas City,MO", "Tulsa,AL")))  
 ```
 
+##Logistic Regression
+```{r}
+baltimore_df = murder_data %>%
+  filter(city_state %in% c("Baltimore,MD")) %>%
+  select(solved_case, victim_age, victim_race, victim_sex)
+  
+baltimore_logistic = 
+  baltimore_df %>% 
+  glm(solved_case ~ victim_age + victim_race + victim_sex, data = ., family = binomial()) 
+
+broom::tidy(baltimore_logistic)
+
+```
