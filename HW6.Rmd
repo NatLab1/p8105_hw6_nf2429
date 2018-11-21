@@ -24,6 +24,9 @@ murder_data = murder_data %>%
   mutate(victim_race = forcats::fct_relevel(victim_race, "White", "Non-White")) %>%
   mutate(victim_age = as.numeric(victim_age)) 
 
+murder_data = murder_data %>%
+  filter(!(city_state %in% c("Dallas,TX,", "Phoenix,AZ", "Kansas City,MO", "Tulsa,AL")))
+
 
 
 ```
