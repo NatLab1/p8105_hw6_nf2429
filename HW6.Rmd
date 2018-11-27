@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(purrr)
+library(modelr)
 ```
 
 #Problem 1  
@@ -25,7 +26,8 @@ murder_data = murder_data %>%
   mutate(solved_case = ifelse(disposition == c("Closed by arrest"), 1, 0)) %>%
   mutate(victim_race = ifelse(victim_race != "White", "Non-White", "White")) %>%
   mutate(victim_race = forcats::fct_relevel(victim_race, "White", "Non-White")) %>%
-  mutate(victim_age = as.numeric(victim_age)) 
+  mutate(victim_age = as.numeric(victim_age)) %>%
+  mutate(victim_sex = forcats::fct_relevel(victim_sex, "Male", "Female", "Unknown"))
 
 murder_data = murder_data %>%
   filter(!(city_state %in% c("Dallas,TX,", "Phoenix,AZ", "Kansas City,MO", "Tulsa,AL")))  
@@ -45,7 +47,27 @@ broom::tidy(baltimore_logistic) %>%
   mutate(OR = exp(estimate), 
          UB = exp(estimate+1.96 * std.error), 
          LB = exp(estimate-1.96 * std.error)) %>%
-  select(term, estimate, OR, LB, UB, p.value) %>% 
+  filter(term == "victim_raceNon-White") %>%
+  select(OR, LB, UB) %>% 
   knitr::kable(digits = 3)
 
+city_logistic =
+  murder_data %>%
+  group_by(city_state) %>%
+  nest()
+
+ city_logistic =
+   city_logistic %>%
+   mutate(solved_logit = map(data, ~glm(solved_case ~ victim_race +  victim_sex + victim_age, data = .x, family = binomial)),
+    solved_logit = map(solved_logit, broom::tidy)) %>%
+  select(-data) %>%
+  unnest()
+ 
+  filter(term == "victim_raceNon-White") %>%
+  mutate(OR = exp(estimate), 
+         UB = exp(estimate+1.96 * std.error), 
+         LB = exp(estimate-1.96 * std.error)) %>%
+  select(city_state, OR, LB, UB) %>% 
+  knitr::kable(digits = 3)
+  
 ```
