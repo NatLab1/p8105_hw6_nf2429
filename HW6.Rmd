@@ -76,6 +76,7 @@ city_logistic
 
 #Problem 2  
 
+##Data Import and cleaning  
 ```{r}
 birth_data = read_csv("data/birthweight.csv") %>%
   janitor::clean_names() %>%
@@ -83,6 +84,23 @@ birth_data = read_csv("data/birthweight.csv") %>%
          frace = as.factor(frace),
          malform = as.factor(malform),
          mrace = as.factor(mrace))
+```
+
+##Linear Models  
+```{r}
+set.seed(10)
+
+bwt ~ delwt + fincome + mheight + momage + mrace + parity + pnumlbw + pnumgsa + ppbmi + ppwt + smoken + wtgain
+#My model contains maternal health-related predictors of baby's birth weight, both clinical and demographic. These are all things that can have a certain amount of intervention, whereas predictors such as the baby's height, head circumference, and physical deformity aren't able to be changed. Additionally, there is most likely some collinearity between these variables, so if more than one of baby's height, head circ, and physical deformity are used in the model, it would bias the model and create a false association.
+
+
+
+
+
+
+
+
+  
   
 
 ```
