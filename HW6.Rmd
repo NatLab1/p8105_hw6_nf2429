@@ -34,7 +34,7 @@ murder_data = murder_data %>%
 ```
 
 ##Logistic Regression
-```{r}
+```{r, fig.height = 6}
 baltimore_df = murder_data %>%
   filter(city_state %in% c("Baltimore,MD")) %>%
   select(solved_case, victim_age, victim_race, victim_sex)
@@ -63,18 +63,26 @@ city_logistic =
   mutate(OR = exp(estimate), 
          UB = exp(estimate+1.96 * std.error), 
          LB = exp(estimate-1.96 * std.error),
-         city_state = forcats::fct_reorder(city_state)) %>%
+         city_state = forcats::fct_reorder(city_state, estimate)) %>%
   select(city_state, OR, LB, UB) %>%
-  knitr::kable(digits = 3)
-
   ggplot(aes(x = city_state, y = OR)) +
   geom_point() +
-  geom_errorbar(aes(ymin = LB, ymax = UB))
+  geom_errorbar(aes(ymin = LB, ymax = UB)) +
+  coord_flip() +
+  labs(x = "Location")
   
+city_logistic
 ```
 
 #Problem 2  
 
 ```{r}
+birth_data = read_csv("data/birthweight.csv") %>%
+  janitor::clean_names() %>%
+  mutate(babysex = as.factor(babysex),
+         frace = as.factor(frace),
+         malform = as.factor(malform),
+         mrace = as.factor(mrace))
+  
 
 ```
