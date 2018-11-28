@@ -84,23 +84,44 @@ birth_data = read_csv("data/birthweight.csv") %>%
          frace = as.factor(frace),
          malform = as.factor(malform),
          mrace = as.factor(mrace))
-```
 
-##Linear Models  
-```{r}
+missing_values = sum(is.na(birth_data))
+missing_values
+```
+Missing values = 0, therefore, there are no missing values in the dataset.  
+
+##My linear model  
+```{r, warning = FALSE}
 set.seed(10)
 
-bwt ~ delwt + fincome + mheight + momage + mrace + parity + pnumlbw + pnumgsa + ppbmi + ppwt + smoken + wtgain
-#My model contains maternal health-related predictors of baby's birth weight, both clinical and demographic. These are all things that can have a certain amount of intervention, whereas predictors such as the baby's height, head circumference, and physical deformity aren't able to be changed. Additionally, there is most likely some collinearity between these variables, so if more than one of baby's height, head circ, and physical deformity are used in the model, it would bias the model and create a false association.
+cv_birthw = crossv_mc(birth_data, 100)
 
+cv_birthw = cv_birthw %>%
+mutate(mat_model = map(train, ~lm(bwt ~ fincome + momage + mrace + parity + pnumlbw + pnumsga + ppbmi + smoken + wtgain, data = .x))) %>%
+  mutate(mat_rmse = map2_dbl(mat_model, test, ~rmse(model = .x, data = .y)))
 
+cv_birthw %>% 
+  select(starts_with("mat_rmse")) %>% 
+  gather(key = model, value = rmse) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin()
 
+mat_model = birth_data %>%
+  lm(bwt ~ fincome + momage + mrace + parity + pnumlbw + pnumsga + ppbmi + smoken + wtgain, data = .)
 
+birth_data %>% 
+  add_predictions(mat_model) %>% 
+  add_residuals(mat_model) %>% 
+  ggplot(aes(x = pred, y = resid)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE) + 
+  labs(x = "Predicted value", y = "Residual")
+```
 
+My model contains maternal health-related predictors of baby's birth weight, both clinical and demographic. These are all things that can have a certain amount of intervention, whereas predictors such as the baby's height, head circumference, and physical deformity aren't able to be changed. Additionally, there is most likely some collinearity between these variables, so if more than one of baby's height, head circumference, and physical deformity are used in the model, it would bias the model and create a false association.
 
+##Comparing to other models  
+```{r}
 
-
-  
-  
 
 ```
